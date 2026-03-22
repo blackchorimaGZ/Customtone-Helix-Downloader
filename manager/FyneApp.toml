@@ -1,7 +1,7 @@
 [App]
 ID = "com.descargadorhelix.manager"
 Name = "Helix Manager"
-Icon = "logo.png"
+Icon = "Icon.png"
 
 [Build]
 Number = 1

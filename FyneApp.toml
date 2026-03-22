@@ -1,7 +1,7 @@
 [App]
 ID = "com.descargadorhelix.main"
 Name = "CustomTone Helix Downloader"
-Icon = "logo.png"
+Icon = "Icon.png"
 
 [Build]
 Number = 1
