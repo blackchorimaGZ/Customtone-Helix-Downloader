@@ -22,16 +22,12 @@ jobs:
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
       - name: Build Main Application
         run: |
-          [ -f FyneApp.toml ] && mv FyneApp.toml FyneApp.toml.bak
           fyne package -os windows -name "CTHD" -src .
-          [ -f FyneApp.toml.bak ] && mv FyneApp.toml.bak FyneApp.toml
         shell: bash
       - name: Build Manager Application
         run: |
           cd manager
-          [ -f FyneApp.toml ] && mv FyneApp.toml FyneApp.toml.bak
           fyne package -os windows -name "CTHD_Manager" -src .
-          [ -f FyneApp.toml.bak ] && mv FyneApp.toml.bak FyneApp.toml
           mv "CTHD_Manager.exe" "../"
         shell: bash
       - name: Package Windows ZIP
@@ -55,31 +51,48 @@ jobs:
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
       - name: Build CTHD (Universal)
         run: |
-          [ -f FyneApp.toml ] && mv FyneApp.toml FyneApp.toml.bak
-          # Build amd64
+          # Build Bundles
           GOARCH=amd64 fyne package -os darwin -name "CTHD_amd64" -src .
-          # Build arm64
           GOARCH=arm64 fyne package -os darwin -name "CTHD_arm64" -src .
-          # Use arm64 as template for the final bundle
+          
+          # Create final bundle from arm64 template
           cp -R "CTHD_arm64.app" "CTHD.app"
-          # Create Universal binary
-          lipo -create -output "CTHD.app/Contents/MacOS/CTHD" "CTHD_amd64.app/Contents/MacOS/CTHD_amd64" "CTHD_arm64.app/Contents/MacOS/CTHD_arm64"
-          # Rename binary in Info.plist
-          sed -i '' 's/CTHD_arm64/CTHD/g' "CTHD.app/Contents/Info.plist"
+          
+          # Find binaries inside (they might be CTHD_amd64/arm64 or descargadorhelix)
+          BIN_AMD64=$(find CTHD_amd64.app/Contents/MacOS -type f -maxdepth 1 | head -n 1)
+          BIN_ARM64=$(find CTHD_arm64.app/Contents/MacOS -type f -maxdepth 1 | head -n 1)
+          
+          # Merge
+          lipo -create -output "CTHD.app/Contents/MacOS/CTHD" "$BIN_AMD64" "$BIN_ARM64"
+          
+          # Fix Info.plist Executable Name
+          OLD_EXEC=$(grep -A1 "CFBundleExecutable" "CTHD.app/Contents/Info.plist" | grep "string" | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+          sed -i '' "s/$OLD_EXEC/CTHD/g" "CTHD.app/Contents/Info.plist"
+          
           rm -rf CTHD_amd64.app CTHD_arm64.app
-          [ -f FyneApp.toml.bak ] && mv FyneApp.toml.bak FyneApp.toml
         shell: bash
       - name: Build Manager Application (Universal)
         run: |
           cd manager
-          [ -f FyneApp.toml ] && mv FyneApp.toml FyneApp.toml.bak
+          # Build Bundles
           GOARCH=amd64 fyne package -os darwin -name "CTHD_Manager_amd64" -src .
           GOARCH=arm64 fyne package -os darwin -name "CTHD_Manager_arm64" -src .
+          
+          # Create final bundle from arm64 template
           cp -R "CTHD_Manager_arm64.app" "CTHD_Manager.app"
-          lipo -create -output "CTHD_Manager.app/Contents/MacOS/CTHD_Manager" "CTHD_Manager_amd64.app/Contents/MacOS/CTHD_Manager_amd64" "CTHD_Manager_arm64.app/Contents/MacOS/CTHD_Manager_arm64"
-          sed -i '' 's/CTHD_Manager_arm64/CTHD_Manager/g' "CTHD_Manager.app/Contents/Info.plist"
+          
+          # Find binaries inside
+          BIN_AMD64=$(find CTHD_Manager_amd64.app/Contents/MacOS -type f -maxdepth 1 | head -n 1)
+          BIN_ARM64=$(find CTHD_Manager_arm64.app/Contents/MacOS -type f -maxdepth 1 | head -n 1)
+          
+          # Merge
+          lipo -create -output "CTHD_Manager.app/Contents/MacOS/CTHD_Manager" "$BIN_AMD64" "$BIN_ARM64"
+          
+          # Fix Info.plist Executable Name
+          OLD_EXEC=$(grep -A1 "CFBundleExecutable" "CTHD_Manager.app/Contents/Info.plist" | grep "string" | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+          sed -i '' "s/$OLD_EXEC/CTHD_Manager/g" "CTHD_Manager.app/Contents/Info.plist"
+          
           rm -rf CTHD_Manager_amd64.app CTHD_Manager_arm64.app
-          [ -f FyneApp.toml.bak ] && mv FyneApp.toml.bak FyneApp.toml
           mv "CTHD_Manager.app" "../"
         shell: bash
       - name: Package macOS ZIP & DMG
@@ -115,23 +128,21 @@ jobs:
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
       - name: Build Main Application
         run: |
-          [ -f FyneApp.toml ] && mv FyneApp.toml FyneApp.toml.bak
           fyne package -os linux -name "CTHD" -src .
-          [ -f FyneApp.toml.bak ] && mv FyneApp.toml.bak FyneApp.toml
-          tar -xvf CTHD.tar.xz
-          find usr -type f -name "CTHD" -exec mv {} ./ \;
-          rm -rf usr
+          # Find any .tar.xz and extract it
+          ls *.tar.xz | xargs -n 1 tar -xvf
+          # Find the actual binary (it might be named CTHD or descargadorhelix)
+          find . -type f -executable -not -name "*.sh" -not -name "*.xz" -not -name "CTHD" -exec mv {} ./CTHD \;
+          rm -rf usr descargadorhelix
         shell: bash
       - name: Build Manager Application
         run: |
           cd manager
-          [ -f FyneApp.toml ] && mv FyneApp.toml FyneApp.toml.bak
           fyne package -os linux -name "CTHD_Manager" -src .
-          [ -f FyneApp.toml.bak ] && mv FyneApp.toml.bak FyneApp.toml
-          tar -xvf CTHD_Manager.tar.xz
-          find usr -type f -name "CTHD_Manager" -exec mv {} ../ \;
+          ls *.tar.xz | xargs -n 1 tar -xvf
+          find . -type f -executable -not -name "*.sh" -not -name "*.xz" -not -name "CTHD_Manager" -exec mv {} ../CTHD_Manager \;
           cd ..
-          rm -rf manager/usr
+          rm -rf manager/usr manager/descargadorhelix
         shell: bash
       - name: Package Linux ZIP
         run: |
