@@ -35,16 +35,16 @@ jobs:
       - name: Build Main Application
         run: |
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            fyne package -os darwin -src .
+            fyne package -os darwin -name "CTHD" -src .
             mkdir -p dmg_root
-            cp -R "CustomTone Helix Downloader.app" dmg_root/
+            cp -R "CTHD.app" dmg_root/
             hdiutil create -volname "CustomTone Helix Downloader" -srcfolder dmg_root -ov -format UDZO "CTHD_macOS.dmg"
           elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            fyne package -os linux -src .
-            tar -czvf "CTHD_Linux.tar.gz" "CustomTone Helix Downloader"
+            fyne package -os linux -name "CTHD" -src .
+            tar -czvf "CTHD_Linux.tar.gz" "CTHD"
           else
-            fyne package -os windows -src .
-            mv "CustomTone Helix Downloader.exe" "CTHD_Windows.exe"
+            fyne package -os windows -name "CTHD" -src .
+            mv "CTHD.exe" "CTHD_Windows.exe"
           fi
         shell: bash
 
@@ -52,17 +52,17 @@ jobs:
         run: |
           cd manager
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            fyne package -os darwin -src .
+            fyne package -os darwin -name "CTHD_Manager" -src .
             mkdir -p dmg_root
-            cp -R "Helix Manager.app" dmg_root/
+            cp -R "CTHD_Manager.app" dmg_root/
             hdiutil create -volname "Helix Manager" -srcfolder dmg_root -ov -format UDZO "CTHD_Manager_macOS.dmg"
             mv "CTHD_Manager_macOS.dmg" ../
           elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            fyne package -os linux -src .
-            tar -czvf "../CTHD_Manager_Linux.tar.gz" "Helix Manager"
+            fyne package -os linux -name "CTHD_Manager" -src .
+            tar -czvf "../CTHD_Manager_Linux.tar.gz" "CTHD_Manager"
           else
-            fyne package -os windows -src .
-            mv "Helix Manager.exe" "../CTHD_Manager_Windows.exe"
+            fyne package -os windows -name "CTHD_Manager" -src .
+            mv "CTHD_Manager.exe" "../CTHD_Manager_Windows.exe"
           fi
         shell: bash
 
