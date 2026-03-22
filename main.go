@@ -835,7 +835,7 @@ func (pb *pulsingButton) TappedSecondary(*fyne.PointEvent) {}
 func main() {
 	cfg := loadConfig()
 
-	descargador := app.NewWithID("com.customtone.helix.downloader")
+	descargador := app.NewWithID("com.descargadorhelix.main")
 	descargador.SetIcon(theme.SettingsIcon())
 	descargador.Settings().SetTheme(&neonTheme{})
 

@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -23,23 +23,46 @@ jobs:
         with:
           go-version: '>=1.22'
 
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev xorg-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
+
       - name: Install Fyne CLI
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name: Build Main Application
         run: |
-          fyne package -os ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }} -src .
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            find . -maxdepth 1 -name "*.app" -exec zip -r "{}.zip" "{}" \;
+            fyne package -os darwin -src .
+            mkdir -p dmg_root
+            cp -R "CustomTone Helix Downloader.app" dmg_root/
+            hdiutil create -volname "CustomTone Helix Downloader" -srcfolder dmg_root -ov -format UDZO "CTHD_macOS.dmg"
+          elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            fyne package -os linux -src .
+            tar -czvf "CTHD_Linux.tar.gz" "CustomTone Helix Downloader"
+          else
+            fyne package -os windows -src .
+            mv "CustomTone Helix Downloader.exe" "CTHD_Windows.exe"
           fi
         shell: bash
 
       - name: Build Manager Application
         run: |
           cd manager
-          fyne package -os ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }} -src .
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            find . -maxdepth 1 -name "*.app" -exec zip -r "{}.zip" "{}" \;
+            fyne package -os darwin -src .
+            mkdir -p dmg_root
+            cp -R "Helix Manager.app" dmg_root/
+            hdiutil create -volname "Helix Manager" -srcfolder dmg_root -ov -format UDZO "CTHD_Manager_macOS.dmg"
+            mv "CTHD_Manager_macOS.dmg" ../
+          elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            fyne package -os linux -src .
+            tar -czvf "../CTHD_Manager_Linux.tar.gz" "Helix Manager"
+          else
+            fyne package -os windows -src .
+            mv "Helix Manager.exe" "../CTHD_Manager_Windows.exe"
           fi
         shell: bash
 
@@ -48,10 +71,12 @@ jobs:
         with:
           name: CTHD-Binaries-${{ matrix.os }}
           path: |
-            *.exe
-            *.app.zip
-            manager/*.exe
-            manager/*.app.zip
+            CTHD_Windows.exe
+            CTHD_Manager_Windows.exe
+            CTHD_macOS.dmg
+            CTHD_Manager_macOS.dmg
+            CTHD_Linux.tar.gz
+            CTHD_Manager_Linux.tar.gz
             manual.html
 
       - name: Create Release
@@ -59,10 +84,12 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            *.exe
-            *.app.zip
-            manager/*.exe
-            manager/*.app.zip
+            CTHD_Windows.exe
+            CTHD_Manager_Windows.exe
+            CTHD_macOS.dmg
+            CTHD_Manager_macOS.dmg
+            CTHD_Linux.tar.gz
+            CTHD_Manager_Linux.tar.gz
             manual.html
           draft: false
           prerelease: false

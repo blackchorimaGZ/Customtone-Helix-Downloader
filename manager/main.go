@@ -210,7 +210,7 @@ func main() {
 	if cfg.Language == "" { cfg.Language = "es" }
 	i18n.SetLang(cfg.Language)
 
-	a := app.NewWithID("com.customtone.helix.manager")
+	a := app.NewWithID("com.descargadorhelix.manager")
 
 	runManager := func() {
 		w := a.NewWindow(i18n.Get("manager_title"))

@@ -1,4 +1,4 @@
-//go:build !windows && !darwin && !linux
+//go:build darwin
 package main
 
 import (
@@ -8,8 +8,7 @@ import (
 )
 
 func MaximizeWindow(w fyne.Window) {
-	// Not supported natively yet on Mac via syscalls here, 
-	// Fyne handles full screen if needed, but we'll leave it as no-op for now.
+	// No-op for macOS
 }
 
 func OpenExplorer(path string) {
