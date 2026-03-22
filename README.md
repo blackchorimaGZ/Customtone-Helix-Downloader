@@ -17,11 +17,14 @@
 - **Embedded Resources**: No external image files needed; everything is self-contained in the `.exe`.
 
 ### How to use
-1. Run `CTHD.exe`.
+1. Run `CTHD.exe` (Windows) or open `CustomTone Helix Downloader.app` (macOS).
 2. Configure your download folder (it will prompt you if not set).
 3. Use the search bar to find presets.
 4. Click "Download" to fetch them.
-5. Use `CTHD_Manager.exe` to manage your local collection.
+5. Use `CTHD_Manager.exe` (Windows) or `Helix Manager.app` (macOS) to manage your local collection.
+
+### Downloads
+You can find the latest version for Windows and macOS in the [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases) section.
 
 ---
 
@@ -38,11 +41,14 @@
 - **Recursos Integrados**: No se necesitan archivos de imagen externos; todo está contenido en el `.exe`.
 
 ### Cómo usar
-1. Ejecuta `CTHD.exe`.
+1. Ejecuta `CTHD.exe` (Windows) o abre `CustomTone Helix Downloader.app` (macOS).
 2. Configura tu carpeta de descarga (se te preguntará si no está configurada).
 3. Usa la barra de búsqueda para encontrar presets.
 4. Haz clic en "Descargar" para obtenerlos.
-5. Usa `CTHD_Manager.exe` para gestionar tu colección local.
+5. Usa `CTHD_Manager.exe` (Windows) o `Helix Manager.app` (macOS) para gestionar tu colección local.
+
+### Descargas
+Puedes encontrar la última versión para Windows y macOS en la sección de [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases).
 
 ---
 

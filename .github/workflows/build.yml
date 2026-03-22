@@ -3,7 +3,12 @@ name: Build CTHD for Windows and macOS
 on:
   push:
     branches: [ "main", "master" ]
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -43,3 +48,18 @@ jobs:
             manager/*.exe
             manager/*.app.zip
             manual.html
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            *.exe
+            *.app.zip
+            manager/*.exe
+            manager/*.app.zip
+            manual.html
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
