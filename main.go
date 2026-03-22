@@ -23,7 +23,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"syscall"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -31,7 +30,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -2362,18 +2360,7 @@ func main() {
 	w.CenterOnScreen()
 	w.Show()
 
-	// Maximize the window after showing it (Windows specific)
-	if nw, ok := w.(driver.NativeWindow); ok {
-		nw.RunNative(func(ctx interface{}) {
-			if winCtx, ok := ctx.(*driver.WindowsWindowContext); ok {
-				hwnd := winCtx.HWND
-				// SW_MAXIMIZE is 3
-				user32 := syscall.NewLazyDLL("user32.dll")
-				showWindow := user32.NewProc("ShowWindow")
-				showWindow.Call(hwnd, 3)
-			}
-		})
-	}
+	MaximizeWindow(w)
 	})
 
 	descargador.Run()
@@ -2381,10 +2368,5 @@ func main() {
 
 // openFolder opens the download folder in the OS file manager
 func openFolder(path string) {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		absPath = path
-	}
-	// Windows specific: explorer works best with absolute paths
-	exec.Command("explorer", absPath).Start()
+	OpenFolder(path)
 }

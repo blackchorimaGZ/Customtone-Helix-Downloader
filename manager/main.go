@@ -8,10 +8,8 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -22,7 +20,6 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"fyne.io/fyne/v2/driver"
 	_ "modernc.org/sqlite"
 	"encoding/json"
 
@@ -222,18 +219,6 @@ func main() {
 		// Diálogo inicial de selección de ruta
 		var showSelectionDialog func()
 
-		maximizeWindow := func(win fyne.Window) {
-			if nw, ok := win.(driver.NativeWindow); ok {
-				nw.RunNative(func(ctx interface{}) {
-					if winCtx, ok := ctx.(*driver.WindowsWindowContext); ok {
-						hwnd := winCtx.HWND
-						user32 := syscall.NewLazyDLL("user32.dll")
-						showWindow := user32.NewProc("ShowWindow")
-						showWindow.Call(hwnd, 3) // SW_MAXIMIZE is 3
-					}
-				})
-			}
-		}
 		
 		startWithFolder := func(targetDir string) {
 			dbPath := filepath.Join(targetDir, DBFilename)
@@ -327,10 +312,7 @@ func main() {
 				btn.OnTapped = func() {
 					idx := id.Row - 1
 					if idx >= 0 && idx < len(dbFilenames) {
-						fn := dbFilenames[idx]
-						full := filepath.Join(currentAppDir, PresetsSubdir, fn)
-						// Correct Windows explorer /select syntax by letting Go handle quoting
-						exec.Command("explorer", "/select,", full).Start()
+						OpenExplorer(filepath.Join(currentAppDir, PresetsSubdir, dbFilenames[idx]))
 					}
 				}
 				return
@@ -394,8 +376,7 @@ func main() {
 			// Let's use a simple dialog choice for now to be robust.
 			dialog.ShowCustom(fmt.Sprintf(i18n.Get("actions_for"), fn), i18n.Get("close_btn"), container.NewVBox(
 				widget.NewButton(i18n.Get("open_explorer_menu"), func() {
-					full := filepath.Join(currentAppDir, PresetsSubdir, fn)
-					exec.Command("explorer", "/select,", full).Start()
+					OpenExplorer(filepath.Join(currentAppDir, PresetsSubdir, fn))
 				}),
 				widget.NewButton(i18n.Get("copy_to_menu"), func() {
 					copyFile(fn)
@@ -454,8 +435,7 @@ func main() {
 
 	btnOpenPresets := widget.NewButtonWithIcon(i18n.Get("open_presets_btn"), theme.FolderOpenIcon(), func() {
 		p := filepath.Join(appDir, PresetsSubdir)
-		os.MkdirAll(p, 0755)
-		exec.Command("explorer", p).Start()
+		OpenFolder(p)
 	})
 
 	lblSearch := widget.NewLabel(i18n.Get("search_label"))
@@ -491,7 +471,7 @@ func main() {
 		w.SetContent(applyGradient(content))
 		w.CenterOnScreen()
 		w.Show()
-		maximizeWindow(w)
+		MaximizeWindow(w)
 		refreshDB()
 		
 		w.SetOnClosed(func() {
@@ -523,7 +503,7 @@ func main() {
 		w.SetContent(applyGradient(container.NewCenter(content)))
 		w.CenterOnScreen()
 		w.Show()
-		maximizeWindow(w)
+		MaximizeWindow(w)
 	}
 
 	showSelectionDialog()
