@@ -23,7 +23,7 @@ jobs:
           go-version: '>=1.22'
 
       - name: Install Fyne CLI
-        run: go install github.com/fyne-io/fyne/v2/cmd/fyne@latest
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name: Build Main Application
         run: |
