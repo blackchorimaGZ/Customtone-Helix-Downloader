@@ -29,7 +29,7 @@ import (
 	"descargadorhelix/i18n"
 )
 
-//go:embed logo.png
+//go:embed Icon.png
 var logoBytes []byte
 
 // --- Copy of Theme and Constants from main.go ---
@@ -99,7 +99,7 @@ func showSplash(a fyne.App, isExit bool, onDone func()) {
 	w.SetFixedSize(true)
 	w.SetPadded(false)
 	
-	img := canvas.NewImageFromResource(fyne.NewStaticResource("logo.png", logoBytes))
+	img := canvas.NewImageFromResource(fyne.NewStaticResource("Icon.png", logoBytes))
 	img.FillMode = canvas.ImageFillContain
 	img.SetMinSize(fyne.NewSize(400, 200))
 
