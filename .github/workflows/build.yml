@@ -91,21 +91,21 @@ jobs:
       - name: Build Main Application
         run: |
           fyne package -os linux -name "CTHD" -src .
-          # The binary is named 'CTHD'
-          mkdir -p dist_linux
-          mv CTHD dist_linux/
-          cp manual.html dist_linux/
-          tar -czvf "CTHD_Linux.tar.gz" -C dist_linux .
+          # fyne package produces CTHD.tar.xz
+          mkdir -p dist_main
+          tar -xvf CTHD.tar.xz -C dist_main
+          cp manual.html dist_main/usr/local/bin/ || cp manual.html dist_main/
+          tar -czvf "CTHD_Linux.tar.gz" -C dist_main .
         shell: bash
       - name: Build Manager Application
         run: |
           cd manager
           fyne package -os linux -name "CTHD_Manager" -src .
-          # The binary is named 'CTHD_Manager'
-          mkdir -p dist_linux
-          mv CTHD_Manager dist_linux/
-          cp ../manual.html dist_linux/
-          tar -czvf "../CTHD_Manager_Linux.tar.gz" -C dist_linux .
+          # produces CTHD_Manager.tar.xz
+          mkdir -p dist_mgr
+          tar -xvf CTHD_Manager.tar.xz -C dist_mgr
+          cp ../manual.html dist_mgr/usr/local/bin/ || cp ../manual.html dist_mgr/
+          tar -czvf "../CTHD_Manager_Linux.tar.gz" -C dist_mgr .
         shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -114,6 +114,7 @@ jobs:
           path: |
             CTHD_Linux.tar.gz
             CTHD_Manager_Linux.tar.gz
+            manual.html
 
   release:
     needs: [build-windows, build-macos, build-linux]
