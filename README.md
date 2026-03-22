@@ -31,6 +31,8 @@ xattr -cr "Helix Manager.app"
 ```
 Then you can open them normally.
 
+**App Translocation (Infinite Permissions)**: If macOS keeps asking for permission at every folder level, it's because the app is running in a temporary sandbox (App Translocation). To fix this, **move the `.app` bundle from your Downloads folder to the `/Applications` folder** before running it.
+
 ### Downloads
 You can find the latest version for Windows and macOS in the [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases) section.
 
@@ -62,6 +64,8 @@ xattr -cr "CustomTone Helix Downloader.app"
 xattr -cr "Helix Manager.app"
 ```
 Después podrás abrirlas normalmente.
+
+**App Translocation (Permisos infinitos)**: Si macOS te pide permisos para cada subcarpeta una y otra vez, es porque la app está en "App Translocation". Para solucionarlo, **mueve el archivo `.app` desde Descargas a la carpeta `/Aplicaciones`** antes de abrirlo.
 
 ### Descargas
 Puedes encontrar la última versión para Windows y macOS en la sección de [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases).
