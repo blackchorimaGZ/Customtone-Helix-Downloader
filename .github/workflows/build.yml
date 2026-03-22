@@ -41,7 +41,8 @@ jobs:
             hdiutil create -volname "CustomTone Helix Downloader" -srcfolder dmg_root -ov -format UDZO "CTHD_macOS.dmg"
           elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             fyne package -os linux -name "CTHD" -src .
-            tar -czvf "CTHD_Linux.tar.gz" "CTHD"
+            ls -R
+            tar -czvf "CTHD_Linux.tar.gz" CTHD*
           else
             fyne package -os windows -name "CTHD" -src .
             mv "CTHD.exe" "CTHD_Windows.exe"
@@ -59,7 +60,8 @@ jobs:
             mv "CTHD_Manager_macOS.dmg" ../
           elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             fyne package -os linux -name "CTHD_Manager" -src .
-            tar -czvf "../CTHD_Manager_Linux.tar.gz" "CTHD_Manager"
+            ls -R
+            tar -czvf "../CTHD_Manager_Linux.tar.gz" CTHD_Manager*
           else
             fyne package -os windows -name "CTHD_Manager" -src .
             mv "CTHD_Manager.exe" "../CTHD_Manager_Windows.exe"
