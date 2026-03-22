@@ -1,0 +1,15 @@
+*.exe
+*.bin
+*.db
+*.test
+*.zip
+*.msi
+*.syso
+descargador_config.json
+PRESETS/
+w64devkit/
+Distribucion/
+logo.png
+manager/logo.png
+main.png
+manager_tmp.png
