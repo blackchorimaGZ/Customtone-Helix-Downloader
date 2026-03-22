@@ -23,6 +23,14 @@
 4. Click "Download" to fetch them.
 5. Use `CTHD_Manager.exe` (Windows) or `Helix Manager.app` (macOS) to manage your local collection.
 
+### macOS Troubleshooting
+If you see an error saying the app is **"damaged"** (because it is unsigned), run this command in your Terminal:
+```bash
+xattr -cr "CustomTone Helix Downloader.app"
+xattr -cr "Helix Manager.app"
+```
+Then you can open them normally.
+
 ### Downloads
 You can find the latest version for Windows and macOS in the [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases) section.
 
@@ -46,6 +54,14 @@ You can find the latest version for Windows and macOS in the [Releases](https://
 3. Usa la barra de búsqueda para encontrar presets.
 4. Haz clic en "Descargar" para obtenerlos.
 5. Usa `CTHD_Manager.exe` (Windows) o `Helix Manager.app` (macOS) para gestionar tu colección local.
+
+### Solución de problemas en macOS
+Si ves un error diciendo que la aplicación está **"dañada"** (debido a que no está firmada), ejecuta este comando en tu Terminal:
+```bash
+xattr -cr "CustomTone Helix Downloader.app"
+xattr -cr "Helix Manager.app"
+```
+Después podrás abrirlas normalmente.
 
 ### Descargas
 Puedes encontrar la última versión para Windows y macOS en la sección de [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases).

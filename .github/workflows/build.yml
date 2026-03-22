@@ -23,22 +23,23 @@ jobs:
       - name: Build Main Application
         run: |
           fyne package -os windows -name "CTHD" -src .
-          mv "CTHD.exe" "CTHD_Windows.exe"
         shell: bash
       - name: Build Manager Application
         run: |
           cd manager
           fyne package -os windows -name "CTHD_Manager" -src .
-          mv "CTHD_Manager.exe" "../CTHD_Manager_Windows.exe"
+          mv "CTHD_Manager.exe" "../"
+        shell: bash
+      - name: Package Windows ZIP
+        run: |
+          # The apps are already CTHD.exe and CTHD_Manager.exe in the root
+          powershell -Command "Compress-Archive -Path 'CTHD.exe', 'CTHD_Manager.exe', 'manual.html', 'README.md' -DestinationPath 'CTHD_Windows.zip'"
         shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: CTHD-Binaries-Windows
-          path: |
-            CTHD_Windows.exe
-            CTHD_Manager_Windows.exe
-            manual.html
+          path: CTHD_Windows.zip
 
   build-macos:
     runs-on: macos-latest
@@ -49,31 +50,58 @@ jobs:
           go-version: '>=1.22'
       - name: Install Fyne CLI
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Build Main Application
+      - name: Build CTHD (Universal)
         run: |
-          fyne package -os darwin -name "CTHD" -src .
-          mkdir -p dmg_root
-          cp -R "CTHD.app" dmg_root/
-          cp "manual.html" dmg_root/
-          hdiutil create -volname "CustomTone Helix Downloader" -srcfolder dmg_root -ov -format UDZO "CTHD_macOS.dmg"
+          # Build amd64
+          GOARCH=amd64 fyne package -os darwin -name "CTHD_amd64" -src .
+          # Build arm64 (default on macos-14)
+          GOARCH=arm64 fyne package -os darwin -name "CTHD_arm64" -src .
+          # Create Universal binary
+          mkdir -p "CTHD.app/Contents/MacOS"
+          lipo -create -output "CTHD.app/Contents/MacOS/CTHD" "CTHD_amd64.app/Contents/MacOS/CTHD_amd64" "CTHD_arm64.app/Contents/MacOS/CTHD_arm64"
+          # Copy resources from one of the packages (arm64)
+          cp -R "CTHD_arm64.app/Contents/Resources" "CTHD.app/Contents/"
+          cp "CTHD_arm64.app/Contents/Info.plist" "CTHD.app/Contents/"
+          cp "CTHD_arm64.app/Contents/PkgInfo" "CTHD.app/Contents/"
+          rm -rf CTHD_amd64.app CTHD_arm64.app
         shell: bash
-      - name: Build Manager Application
+      - name: Build Manager Application (Universal)
         run: |
           cd manager
-          fyne package -os darwin -name "CTHD_Manager" -src .
+          # Build amd64
+          GOARCH=amd64 fyne package -os darwin -name "CTHD_Manager_amd64" -src .
+          # Build arm64
+          GOARCH=arm64 fyne package -os darwin -name "CTHD_Manager_arm64" -src .
+          # Create Universal binary
+          mkdir -p "CTHD_Manager.app/Contents/MacOS"
+          lipo -create -output "CTHD_Manager.app/Contents/MacOS/CTHD_Manager" "CTHD_Manager_amd64.app/Contents/MacOS/CTHD_Manager_amd64" "CTHD_Manager_arm64.app/Contents/MacOS/CTHD_Manager_arm64"
+          # Copy resources
+          cp -R "CTHD_Manager_arm64.app/Contents/Resources" "CTHD_Manager.app/Contents/"
+          cp "CTHD_Manager_arm64.app/Contents/Info.plist" "CTHD_Manager.app/Contents/"
+          cp "CTHD_Manager_arm64.app/Contents/PkgInfo" "CTHD_Manager.app/Contents/"
+          rm -rf CTHD_Manager_amd64.app CTHD_Manager_arm64.app
+          mv "CTHD_Manager.app" "../"
+        shell: bash
+      - name: Package macOS ZIP & DMG
+        run: |
+          # ZIP as requested by user
+          zip -r CTHD_macOS.zip "CTHD.app" "CTHD_Manager.app" manual.html README.md
+          
+          # Maintain DMG for convenience
           mkdir -p dmg_root
+          cp -R "CTHD.app" dmg_root/
           cp -R "CTHD_Manager.app" dmg_root/
-          cp "../manual.html" dmg_root/
-          hdiutil create -volname "Helix Manager" -srcfolder dmg_root -ov -format UDZO "CTHD_Manager_macOS.dmg"
-          mv "CTHD_Manager_macOS.dmg" ../
+          cp "manual.html" dmg_root/
+          cp "README.md" dmg_root/
+          hdiutil create -volname "CTHD Universal" -srcfolder dmg_root -ov -format UDZO "CTHD_macOS.dmg"
         shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: CTHD-Binaries-macOS
           path: |
+            CTHD_macOS.zip
             CTHD_macOS.dmg
-            CTHD_Manager_macOS.dmg
 
   build-linux:
     runs-on: ubuntu-latest
@@ -92,29 +120,29 @@ jobs:
         run: |
           fyne package -os linux -name "CTHD" -src .
           # fyne package produces CTHD.tar.xz
-          mkdir -p dist_main
-          tar -xvf CTHD.tar.xz -C dist_main
-          cp manual.html dist_main/usr/local/bin/ || cp manual.html dist_main/
-          tar -czvf "CTHD_Linux.tar.gz" -C dist_main .
+          tar -xvf CTHD.tar.xz
+          mv usr/local/bin/CTHD ./
+          rm -rf usr
         shell: bash
       - name: Build Manager Application
         run: |
           cd manager
           fyne package -os linux -name "CTHD_Manager" -src .
           # produces CTHD_Manager.tar.xz
-          mkdir -p dist_mgr
-          tar -xvf CTHD_Manager.tar.xz -C dist_mgr
-          cp ../manual.html dist_mgr/usr/local/bin/ || cp ../manual.html dist_mgr/
-          tar -czvf "../CTHD_Manager_Linux.tar.gz" -C dist_mgr .
+          tar -xvf CTHD_Manager.tar.xz
+          mv usr/local/bin/CTHD_Manager ../
+          cd ..
+          rm -rf manager/usr
+        shell: bash
+      - name: Package Linux ZIP
+        run: |
+          zip -r CTHD_Linux.zip CTHD CTHD_Manager manual.html README.md
         shell: bash
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: CTHD-Binaries-Linux
-          path: |
-            CTHD_Linux.tar.gz
-            CTHD_Manager_Linux.tar.gz
-            manual.html
+          path: CTHD_Linux.zip
 
   release:
     needs: [build-windows, build-macos, build-linux]
@@ -131,13 +159,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/CTHD_Windows.exe
-            artifacts/CTHD_Manager_Windows.exe
+            artifacts/CTHD_Windows.zip
+            artifacts/CTHD_macOS.zip
             artifacts/CTHD_macOS.dmg
-            artifacts/CTHD_Manager_macOS.dmg
-            artifacts/CTHD_Linux.tar.gz
-            artifacts/CTHD_Manager_Linux.tar.gz
-            artifacts/manual.html
+            artifacts/CTHD_Linux.zip
           draft: false
           prerelease: false
         env:
