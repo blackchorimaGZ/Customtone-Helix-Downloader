@@ -1,0 +1,8 @@
+[App]
+ID = "com.descargadorhelix.manager"
+Name = "Helix Manager"
+Icon = "logo.png"
+
+[Build]
+Number = 1
+Version = "1.0.0"

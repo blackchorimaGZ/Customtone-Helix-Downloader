@@ -1,0 +1,8 @@
+[App]
+ID = "com.descargadorhelix.main"
+Name = "CustomTone Helix Downloader"
+Icon = "logo.png"
+
+[Build]
+Number = 1
+Version = "1.0.0"

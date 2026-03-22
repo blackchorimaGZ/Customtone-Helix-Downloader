@@ -1,0 +1,45 @@
+name: Build CTHD for Windows and macOS
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.22'
+
+      - name: Build Main Application
+        uses: fyne-io/fyne-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          target: ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }}
+          source-dir: "."
+          release: true
+
+      - name: Build Manager Application
+        uses: fyne-io/fyne-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          target: ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }}
+          source-dir: "manager"
+          release: true
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CTHD-Binaries-${{ matrix.os }}
+          path: |
+            *.exe
+            *.app.zip
+            manager/*.exe
+            manager/*.app.zip
+            manual.html
