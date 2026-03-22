@@ -13,6 +13,7 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -29,7 +30,7 @@ jobs:
         run: |
           fyne package -os ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }} -src .
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            zip -r "CustomTone Helix Downloader.app.zip" "CustomTone Helix Downloader.app"
+            find . -maxdepth 1 -name "*.app" -exec zip -r "{}.zip" "{}" \;
           fi
         shell: bash
 
@@ -38,7 +39,7 @@ jobs:
           cd manager
           fyne package -os ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }} -src .
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            zip -r "Helix Manager.app.zip" "Helix Manager.app"
+            find . -maxdepth 1 -name "*.app" -exec zip -r "{}.zip" "{}" \;
           fi
         shell: bash
 
