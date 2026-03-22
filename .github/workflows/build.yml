@@ -52,42 +52,31 @@ jobs:
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
       - name: Build CTHD (Universal)
         run: |
-          # Build amd64
+          # Create bundles for both architectures
           GOARCH=amd64 fyne package -os darwin -name "CTHD_amd64" -src .
-          # Build arm64 (default on macos-14)
           GOARCH=arm64 fyne package -os darwin -name "CTHD_arm64" -src .
-          # Create Universal binary
-          mkdir -p "CTHD.app/Contents/MacOS"
+          # Create the final Universal bundle structure from arm64
+          cp -R "CTHD_arm64.app" "CTHD.app"
+          # Merge binaries into the final bundle
           lipo -create -output "CTHD.app/Contents/MacOS/CTHD" "CTHD_amd64.app/Contents/MacOS/CTHD_amd64" "CTHD_arm64.app/Contents/MacOS/CTHD_arm64"
-          # Copy resources from one of the packages (arm64)
-          cp -R "CTHD_arm64.app/Contents/Resources" "CTHD.app/Contents/"
-          cp "CTHD_arm64.app/Contents/Info.plist" "CTHD.app/Contents/"
-          cp "CTHD_arm64.app/Contents/PkgInfo" "CTHD.app/Contents/"
+          # Fix executable name in Info.plist if necessary (it should be CTHD now)
+          sed -i '' 's/CTHD_arm64/CTHD/g' "CTHD.app/Contents/Info.plist"
           rm -rf CTHD_amd64.app CTHD_arm64.app
         shell: bash
       - name: Build Manager Application (Universal)
         run: |
           cd manager
-          # Build amd64
           GOARCH=amd64 fyne package -os darwin -name "CTHD_Manager_amd64" -src .
-          # Build arm64
           GOARCH=arm64 fyne package -os darwin -name "CTHD_Manager_arm64" -src .
-          # Create Universal binary
-          mkdir -p "CTHD_Manager.app/Contents/MacOS"
+          cp -R "CTHD_Manager_arm64.app" "CTHD_Manager.app"
           lipo -create -output "CTHD_Manager.app/Contents/MacOS/CTHD_Manager" "CTHD_Manager_amd64.app/Contents/MacOS/CTHD_Manager_amd64" "CTHD_Manager_arm64.app/Contents/MacOS/CTHD_Manager_arm64"
-          # Copy resources
-          cp -R "CTHD_Manager_arm64.app/Contents/Resources" "CTHD_Manager.app/Contents/"
-          cp "CTHD_Manager_arm64.app/Contents/Info.plist" "CTHD_Manager.app/Contents/"
-          cp "CTHD_Manager_arm64.app/Contents/PkgInfo" "CTHD_Manager.app/Contents/"
+          sed -i '' 's/CTHD_Manager_arm64/CTHD_Manager/g' "CTHD_Manager.app/Contents/Info.plist"
           rm -rf CTHD_Manager_amd64.app CTHD_Manager_arm64.app
           mv "CTHD_Manager.app" "../"
         shell: bash
       - name: Package macOS ZIP & DMG
         run: |
-          # ZIP as requested by user
           zip -r CTHD_macOS.zip "CTHD.app" "CTHD_Manager.app" manual.html README.md
-          
-          # Maintain DMG for convenience
           mkdir -p dmg_root
           cp -R "CTHD.app" dmg_root/
           cp -R "CTHD_Manager.app" dmg_root/
@@ -119,18 +108,17 @@ jobs:
       - name: Build Main Application
         run: |
           fyne package -os linux -name "CTHD" -src .
-          # fyne package produces CTHD.tar.xz
           tar -xvf CTHD.tar.xz
-          mv usr/local/bin/CTHD ./
+          # Find the binary regardless of exact path
+          find usr -type f -name "CTHD" -exec mv {} ./ \;
           rm -rf usr
         shell: bash
       - name: Build Manager Application
         run: |
           cd manager
           fyne package -os linux -name "CTHD_Manager" -src .
-          # produces CTHD_Manager.tar.xz
           tar -xvf CTHD_Manager.tar.xz
-          mv usr/local/bin/CTHD_Manager ../
+          find usr -type f -name "CTHD_Manager" -exec mv {} ../ \;
           cd ..
           rm -rf manager/usr
         shell: bash
