@@ -36,6 +36,11 @@ Then you can open them normally.
 ### Downloads
 You can find the latest version for Windows and macOS in the [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases) section.
 
+### Support
+If you find this tool useful and want to support its development, you can buy me a coffee!
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/blackchorima)
+
 ---
 
 ## Español
@@ -69,6 +74,11 @@ Después podrás abrirlas normalmente.
 
 ### Descargas
 Puedes encontrar la última versión para Windows y macOS en la sección de [Releases](https://github.com/blackchorimaGZ/Customtone-Helix-Downloader/releases).
+
+### Soporte
+Si encuentras esta herramienta útil y quieres apoyar su desarrollo, ¡puedes invitarme a un café!
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/blackchorima)
 
 ---
 

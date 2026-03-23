@@ -156,6 +156,9 @@ var dict = map[string]map[string]string{
 		"dl_new_only_btn":      "Solo nuevos",
 		"completed_short":      "Descarga completada",
 		"error_init_db":        "Error inicializando DB en el arranque",
+		"btn_donate":           "☕ Donar",
+		"btn_theme_dark":       "🌙 Oscuro",
+		"btn_theme_light":      "☀️ Claro",
 	},
 	"en": {
 		"app_title":            "CustomTone Helix Downloader",
@@ -286,6 +289,9 @@ var dict = map[string]map[string]string{
 		"dl_new_only_btn":      "New only",
 		"completed_short":      "Download completed",
 		"error_init_db":        "Error initializing DB on startup",
+		"btn_donate":           "☕ Donate",
+		"btn_theme_dark":       "🌙 Dark",
+		"btn_theme_light":      "☀️ Light",
 	},
 }
 

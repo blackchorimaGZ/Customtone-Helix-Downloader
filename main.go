@@ -70,6 +70,8 @@ const (
 )
 
 // ── Neon Theme (matching logo colors) ─────────────────────────────────
+var currentThemeIsDark = true
+
 var (
 	colBG        = color.NRGBA{R: 0x0D, G: 0x0B, B: 0x1E, A: 0xFF}
 	colSurface   = color.NRGBA{R: 0x1A, G: 0x16, B: 0x33, A: 0xFF}
@@ -78,9 +80,50 @@ var (
 	colRed       = color.NRGBA{R: 0xFF, G: 0x30, B: 0x30, A: 0xFF}
 	colGreen     = color.NRGBA{R: 0x30, G: 0xE0, B: 0x80, A: 0xFF}
 	colYellow    = color.NRGBA{R: 0xFF, G: 0xD0, B: 0x40, A: 0xFF}
-	colFG        = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF} // Pure White
-	colDimFG     = color.NRGBA{R: 0xC0, G: 0xC0, B: 0xE0, A: 0xFF} // Brighter Dim
+	colFG        = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+	colDimFG     = color.NRGBA{R: 0xC0, G: 0xC0, B: 0xE0, A: 0xFF}
+	// Theme-aware inline colors
+	colTableAlt  = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+	colSelection = color.NRGBA{R: 0x00, G: 0xBF, B: 0xFF, A: 0x40}
+	colHeader    = color.NRGBA{R: 0x15, G: 0x12, B: 0x2B, A: 0xFF}
+	colSearchGrad1 = color.NRGBA{R: 0, G: 0, B: 0, A: 100}
+	colSearchGrad2 = color.NRGBA{R: 0x1A, G: 0x16, B: 0x33, A: 200}
 )
+
+func switchThemeColors(isDark bool) {
+	currentThemeIsDark = isDark
+	if isDark {
+		colBG = color.NRGBA{R: 0x0D, G: 0x0B, B: 0x1E, A: 0xFF}
+		colSurface = color.NRGBA{R: 0x1A, G: 0x16, B: 0x33, A: 0xFF}
+		colAccent = color.NRGBA{R: 0x00, G: 0xBF, B: 0xFF, A: 0xFF}
+		colMagenta = color.NRGBA{R: 0xE0, G: 0x30, B: 0xA0, A: 0xFF}
+		colRed = color.NRGBA{R: 0xFF, G: 0x30, B: 0x30, A: 0xFF}
+		colGreen = color.NRGBA{R: 0x30, G: 0xE0, B: 0x80, A: 0xFF}
+		colYellow = color.NRGBA{R: 0xFF, G: 0xD0, B: 0x40, A: 0xFF}
+		colFG = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+		colDimFG = color.NRGBA{R: 0xC0, G: 0xC0, B: 0xE0, A: 0xFF}
+		colTableAlt = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+		colSelection = color.NRGBA{R: 0x00, G: 0xBF, B: 0xFF, A: 0x40}
+		colHeader = color.NRGBA{R: 0x15, G: 0x12, B: 0x2B, A: 0xFF}
+		colSearchGrad1 = color.NRGBA{R: 0, G: 0, B: 0, A: 100}
+		colSearchGrad2 = color.NRGBA{R: 0x1A, G: 0x16, B: 0x33, A: 200}
+	} else {
+		colBG = color.NRGBA{R: 0xF0, G: 0xF2, B: 0xF5, A: 0xFF}
+		colSurface = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+		colAccent = color.NRGBA{R: 0x00, G: 0x77, B: 0xCC, A: 0xFF}
+		colMagenta = color.NRGBA{R: 0xC0, G: 0x20, B: 0x80, A: 0xFF}
+		colRed = color.NRGBA{R: 0xDC, G: 0x26, B: 0x26, A: 0xFF}
+		colGreen = color.NRGBA{R: 0x16, G: 0xA3, B: 0x4A, A: 0xFF}
+		colYellow = color.NRGBA{R: 0xD9, G: 0x77, B: 0x06, A: 0xFF}
+		colFG = color.NRGBA{R: 0x1A, G: 0x1A, B: 0x2E, A: 0xFF}
+		colDimFG = color.NRGBA{R: 0x6B, G: 0x72, B: 0x80, A: 0xFF}
+		colTableAlt = color.NRGBA{R: 0xE8, G: 0xEA, B: 0xF0, A: 0xFF}
+		colSelection = color.NRGBA{R: 0x00, G: 0x77, B: 0xCC, A: 0x30}
+		colHeader = color.NRGBA{R: 0xD0, G: 0xD0, B: 0xE8, A: 0xFF}
+		colSearchGrad1 = color.NRGBA{R: 0xE0, G: 0xE2, B: 0xEA, A: 0xFF}
+		colSearchGrad2 = color.NRGBA{R: 0xF0, G: 0xF2, B: 0xF5, A: 0xFF}
+	}
+}
 
 type neonTheme struct{}
 
@@ -97,7 +140,7 @@ func (n *neonTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	case theme.ColorNameFocus:
 		return colAccent
 	case theme.ColorNameSelection:
-		return color.NRGBA{R: 0, G: 0xBF, B: 0xFF, A: 0x40}
+		return colSelection
 	case theme.ColorNameInputBackground:
 		return colSurface
 	case theme.ColorNameInputBorder:
@@ -109,7 +152,7 @@ func (n *neonTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	case theme.ColorNameScrollBar:
 		return colDimFG
 	case theme.ColorNameHeaderBackground:
-		return color.NRGBA{R: 0x15, G: 0x12, B: 0x2B, A: 0xFF}
+		return colHeader
 	case theme.ColorNameShadow:
 		return color.Transparent
 	case theme.ColorNameSuccess:
@@ -119,9 +162,15 @@ func (n *neonTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	case theme.ColorNameWarning:
 		return colYellow
 	case theme.ColorNameOverlayBackground:
-		return color.Black
+		if currentThemeIsDark {
+			return color.Black
+		}
+		return color.NRGBA{R: 0, G: 0, B: 0, A: 0xC0}
 	default:
-		return theme.DefaultTheme().Color(name, theme.VariantDark)
+		if currentThemeIsDark {
+			return theme.DefaultTheme().Color(name, theme.VariantDark)
+		}
+		return theme.DefaultTheme().Color(name, theme.VariantLight)
 	}
 }
 
@@ -165,6 +214,7 @@ type Config struct {
 	Sort           string `json:"sort"`
 	LastSearchDate string `json:"last_search_date"`
 	Language       string `json:"language"`
+	Theme          string `json:"theme"`
 }
 
 type LocalDBEntry struct {
@@ -232,7 +282,11 @@ func loadConfig() Config {
 	if cfg.Language == "" {
 		cfg.Language = "es"
 	}
+	if cfg.Theme == "" {
+		cfg.Theme = "dark"
+	}
 	i18n.SetLang(cfg.Language)
+	switchThemeColors(cfg.Theme != "light")
 	return cfg
 }
 
@@ -1182,9 +1236,9 @@ func main() {
 			l.TextStyle = fyne.TextStyle{}
 
 			if isSelected {
-				bg.FillColor = color.NRGBA{R: 0x00, G: 0xBF, B: 0xFF, A: 0x40}
+				bg.FillColor = colSelection
 			} else if id.Row%2 == 0 {
-				bg.FillColor = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+				bg.FillColor = colTableAlt
 			} else {
 				bg.FillColor = color.Transparent
 			}
@@ -1952,12 +2006,39 @@ func main() {
 	var updateTexts func()
 	var updateMainContent func()
 
+	// Donation button
+	btnDonate := widget.NewButtonWithIcon(i18n.Get("btn_donate"), theme.InfoIcon(), func() {
+		u, _ := url.Parse("https://buymeacoffee.com/blackchorima")
+		descargador.OpenURL(u)
+	})
+
+	// Theme toggle button
+	themeLabel := i18n.Get("btn_theme_light")
+	if !currentThemeIsDark {
+		themeLabel = i18n.Get("btn_theme_dark")
+	}
+	btnTheme := widget.NewButton(themeLabel, nil)
+	btnTheme.OnTapped = func() {
+		switchThemeColors(!currentThemeIsDark)
+		if currentThemeIsDark {
+			cfg.Theme = "dark"
+			btnTheme.SetText(i18n.Get("btn_theme_light"))
+		} else {
+			cfg.Theme = "light"
+			btnTheme.SetText(i18n.Get("btn_theme_dark"))
+		}
+		saveConfig(cfg)
+		descargador.Settings().SetTheme(&neonTheme{})
+		if updateMainContent != nil {
+			updateMainContent()
+		}
+	}
+
 	// Language Selector
 	langSelector := i18n.NewLangSelector(w, cfg.Language, func(newLang string) {
 		cfg.Language = newLang
 		saveConfig(cfg)
-		i18n.SetLang(newLang) // Added!
-		// We will define updateTexts shortly below
+		i18n.SetLang(newLang)
 		if updateTexts != nil {
 			updateTexts()
 		}
@@ -1982,11 +2063,13 @@ func main() {
 		btnSearch,
 		layout.NewSpacer(),
 		langSelector,
+		btnTheme,
 		btnManual,
+		btnDonate,
 		lblFolder, btnFolder, folderLabel,
 	)
 	
-	searchBg := canvas.NewLinearGradient(color.NRGBA{R: 0, G: 0, B: 0, A: 100}, color.NRGBA{R: 0x1a, G: 0x16, B: 0x33, A: 200}, 90)
+	searchBg := canvas.NewLinearGradient(colSearchGrad1, colSearchGrad2, 90)
 	searchContainer := container.NewMax(searchBg, container.NewPadded(searchRow))
 
 	btnDlAll.Importance = widget.HighImportance // Make download colorful
@@ -2077,6 +2160,12 @@ func main() {
 		btnFolder.SetText(i18n.Get("folder_btn"))
 		btnOpenFolder.SetText(i18n.Get("open_folder_btn"))
 		btnManual.SetText(i18n.Get("btn_help"))
+		btnDonate.SetText(i18n.Get("btn_donate"))
+		if currentThemeIsDark {
+			btnTheme.SetText(i18n.Get("btn_theme_light"))
+		} else {
+			btnTheme.SetText(i18n.Get("btn_theme_dark"))
+		}
 		
 		btnDlAll.SetText(i18n.Get("btn_dl_all"))
 		btnDlSel.SetText(i18n.Get("btn_dl_sel"))
@@ -2104,6 +2193,11 @@ func main() {
 	}
 
 	updateMainContent = func() {
+		// Refresh gradient colors
+		searchBg.StartColor = colSearchGrad1
+		searchBg.EndColor = colSearchGrad2
+		searchBg.Refresh()
+
 		// The base underlying application view
 		baseAppContent := container.NewBorder(
 			container.NewVBox(topSection, container.NewPadded(actionRow), container.NewPadded(pageNav)),
@@ -2195,7 +2289,7 @@ func main() {
 				}
 
 				if id.Row%2 == 0 {
-					bg.FillColor = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+					bg.FillColor = colTableAlt
 				} else {
 					bg.FillColor = color.Transparent
 				}

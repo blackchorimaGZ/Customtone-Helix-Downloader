@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,16 +38,50 @@ const (
 	PresetsSubdir = "PRESETS"
 )
 
+var currentThemeIsDark = true
+
 var (
 	colBG      = color.NRGBA{R: 0x0D, G: 0x0B, B: 0x1E, A: 0xFF}
 	colSurface = color.NRGBA{R: 0x1A, G: 0x16, B: 0x33, A: 0xFF}
 	colAccent  = color.NRGBA{R: 0x00, G: 0xBF, B: 0xFF, A: 0xFF}
-	colFG      = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF} // Pure White
-	colDimFG   = color.NRGBA{R: 0xC0, G: 0xC0, B: 0xE0, A: 0xFF} // Brighter Dim
+	colFG      = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+	colDimFG   = color.NRGBA{R: 0xC0, G: 0xC0, B: 0xE0, A: 0xFF}
 	colRed     = color.NRGBA{R: 0xFF, G: 0x30, B: 0x30, A: 0xFF}
 	colGreen   = color.NRGBA{R: 0x30, G: 0xE0, B: 0x80, A: 0xFF}
 	colYellow  = color.NRGBA{R: 0xFF, G: 0xD0, B: 0x40, A: 0xFF}
+	colTableAlt = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+	colHeader   = color.NRGBA{R: 0x15, G: 0x12, B: 0x2B, A: 0xFF}
+	colSelection = color.NRGBA{R: 0, G: 0xBF, B: 0xFF, A: 0x40}
 )
+
+func switchThemeColors(isDark bool) {
+	currentThemeIsDark = isDark
+	if isDark {
+		colBG = color.NRGBA{R: 0x0D, G: 0x0B, B: 0x1E, A: 0xFF}
+		colSurface = color.NRGBA{R: 0x1A, G: 0x16, B: 0x33, A: 0xFF}
+		colAccent = color.NRGBA{R: 0x00, G: 0xBF, B: 0xFF, A: 0xFF}
+		colFG = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+		colDimFG = color.NRGBA{R: 0xC0, G: 0xC0, B: 0xE0, A: 0xFF}
+		colRed = color.NRGBA{R: 0xFF, G: 0x30, B: 0x30, A: 0xFF}
+		colGreen = color.NRGBA{R: 0x30, G: 0xE0, B: 0x80, A: 0xFF}
+		colYellow = color.NRGBA{R: 0xFF, G: 0xD0, B: 0x40, A: 0xFF}
+		colTableAlt = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+		colHeader = color.NRGBA{R: 0x15, G: 0x12, B: 0x2B, A: 0xFF}
+		colSelection = color.NRGBA{R: 0, G: 0xBF, B: 0xFF, A: 0x40}
+	} else {
+		colBG = color.NRGBA{R: 0xF0, G: 0xF2, B: 0xF5, A: 0xFF}
+		colSurface = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+		colAccent = color.NRGBA{R: 0x00, G: 0x77, B: 0xCC, A: 0xFF}
+		colFG = color.NRGBA{R: 0x1A, G: 0x1A, B: 0x2E, A: 0xFF}
+		colDimFG = color.NRGBA{R: 0x6B, G: 0x72, B: 0x80, A: 0xFF}
+		colRed = color.NRGBA{R: 0xDC, G: 0x26, B: 0x26, A: 0xFF}
+		colGreen = color.NRGBA{R: 0x16, G: 0xA3, B: 0x4A, A: 0xFF}
+		colYellow = color.NRGBA{R: 0xD9, G: 0x77, B: 0x06, A: 0xFF}
+		colTableAlt = color.NRGBA{R: 0xE8, G: 0xEA, B: 0xF0, A: 0xFF}
+		colHeader = color.NRGBA{R: 0xD0, G: 0xD0, B: 0xE8, A: 0xFF}
+		colSelection = color.NRGBA{R: 0x00, G: 0x77, B: 0xCC, A: 0x30}
+	}
+}
 
 type neonTheme struct{}
 
@@ -57,19 +92,23 @@ func (n *neonTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	case theme.ColorNameButton: return colSurface
 	case theme.ColorNamePrimary: return colAccent
 	case theme.ColorNameFocus: return colAccent
-	case theme.ColorNameSelection: return color.NRGBA{R: 0, G: 0xBF, B: 0xFF, A: 0x40}
+	case theme.ColorNameSelection: return colSelection
 	case theme.ColorNameInputBackground: return colSurface
 	case theme.ColorNameInputBorder: return colDimFG
 	case theme.ColorNamePlaceHolder: return colDimFG
 	case theme.ColorNameDisabled: return colDimFG
 	case theme.ColorNameScrollBar: return colDimFG
-	case theme.ColorNameHeaderBackground: return color.NRGBA{R: 0x15, G: 0x12, B: 0x2B, A: 0xFF}
+	case theme.ColorNameHeaderBackground: return colHeader
 	case theme.ColorNameShadow: return color.Transparent
 	case theme.ColorNameSuccess: return colGreen
 	case theme.ColorNameError: return colRed
 	case theme.ColorNameWarning: return colYellow
-	case theme.ColorNameOverlayBackground: return color.Black
-	default: return theme.DefaultTheme().Color(name, theme.VariantDark)
+	case theme.ColorNameOverlayBackground:
+		if currentThemeIsDark { return color.Black }
+		return color.NRGBA{R: 0, G: 0, B: 0, A: 0xC0}
+	default: 
+		if currentThemeIsDark { return theme.DefaultTheme().Color(name, theme.VariantDark) }
+		return theme.DefaultTheme().Color(name, theme.VariantLight)
 	}
 }
 
@@ -201,16 +240,20 @@ func main() {
 	
 	type TempConfig struct {
 		Language string `json:"language"`
+		Theme    string `json:"theme"`
 	}
-	cfg := TempConfig{Language: "es"}
+	cfg := TempConfig{Language: "es", Theme: "dark"}
 	cfgFile := filepath.Join(appDir, "descargador_config.json")
 	if data, err := os.ReadFile(cfgFile); err == nil {
 		json.Unmarshal(data, &cfg)
 	}
 	if cfg.Language == "" { cfg.Language = "es" }
+	if cfg.Theme == "" { cfg.Theme = "dark" }
 	i18n.SetLang(cfg.Language)
+	switchThemeColors(cfg.Theme != "light")
 
 	a := app.NewWithID("com.descargadorhelix.manager")
+	a.Settings().SetTheme(&neonTheme{})
 
 	runManager := func() {
 		w := a.NewWindow(i18n.Get("manager_title"))
@@ -299,7 +342,7 @@ func main() {
 			h.Hide()
 			// Background colors
 			if id.Row%2 == 0 {
-				bg.FillColor = color.NRGBA{R: 0x2A, G: 0x26, B: 0x43, A: 0xFF}
+				bg.FillColor = colTableAlt
 			} else {
 				bg.FillColor = color.Transparent
 			}
@@ -321,7 +364,7 @@ func main() {
 			btn.Hide()
 			l.Show()
 			l.TextStyle = fyne.TextStyle{}
-			l.Color = color.White // Explicitly white for contrast
+			l.Color = colFG // Use themed color for contrast
 			idx := id.Row - 1
 			if idx >= len(dbResults) { return }
 			
@@ -440,7 +483,42 @@ func main() {
 
 	lblSearch := widget.NewLabel(i18n.Get("search_label"))
 
-	langSelector := i18n.NewLangSelector(w, cfg.Language, func(newLang string) {
+	var langSelector *fyne.Container
+
+	btnDonate := widget.NewButtonWithIcon(i18n.Get("btn_donate"), theme.InfoIcon(), func() {
+		u, _ := url.Parse("https://buymeacoffee.com/blackchorima")
+		a.OpenURL(u)
+	})
+
+	themeLabel := i18n.Get("btn_theme_light")
+	if !currentThemeIsDark {
+		themeLabel = i18n.Get("btn_theme_dark")
+	}
+	btnTheme := widget.NewButton(themeLabel, nil)
+	btnTheme.OnTapped = func() {
+		switchThemeColors(!currentThemeIsDark)
+		if currentThemeIsDark {
+			cfg.Theme = "dark"
+			btnTheme.SetText(i18n.Get("btn_theme_light"))
+		} else {
+			cfg.Theme = "light"
+			btnTheme.SetText(i18n.Get("btn_theme_dark"))
+		}
+		
+		// Update config file
+		data, _ := os.ReadFile(cfgFile)
+		var fullCfg map[string]interface{}
+		json.Unmarshal(data, &fullCfg)
+		if fullCfg == nil { fullCfg = make(map[string]interface{}) }
+		fullCfg["theme"] = cfg.Theme
+		newData, _ := json.MarshalIndent(fullCfg, "", "  ")
+		os.WriteFile(cfgFile, newData, 0644)
+		
+		a.Settings().SetTheme(&neonTheme{})
+		dbTable.Refresh()
+	}
+
+	langSelector = i18n.NewLangSelector(w, cfg.Language, func(newLang string) {
 		cfg.Language = newLang
 		data, _ := os.ReadFile(cfgFile)
 		var fullCfg map[string]interface{}
@@ -450,18 +528,23 @@ func main() {
 		newData, _ := json.MarshalIndent(fullCfg, "", "  ")
 		os.WriteFile(cfgFile, newData, 0644)
 		
-		// Hot Reload Text updates
 		i18n.SetLang(newLang)
 		w.SetTitle(i18n.Get("manager_title"))
 		searchEntry.SetPlaceHolder(i18n.Get("manager_search_ph"))
 		btnOpenPresets.SetText(i18n.Get("open_presets_btn"))
 		lblSearch.SetText(i18n.Get("search_label"))
-		dbTable.Refresh() // refreshes headers + row texts natively
+		btnDonate.SetText(i18n.Get("btn_donate"))
+		if currentThemeIsDark {
+			btnTheme.SetText(i18n.Get("btn_theme_light"))
+		} else {
+			btnTheme.SetText(i18n.Get("btn_theme_dark"))
+		}
+		dbTable.Refresh()
 	})
 
 	content := container.NewBorder(
 		container.NewVBox(
-			container.NewHBox(layout.NewSpacer(), langSelector),
+			container.NewHBox(layout.NewSpacer(), btnDonate, btnTheme, langSelector),
 			container.NewPadded(container.NewBorder(nil, nil, lblSearch, nil, searchEntry)),
 			container.NewCenter(btnOpenPresets),
 		),
